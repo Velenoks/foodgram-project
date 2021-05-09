@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Последние обновления{% endblock %}
+{% block header %}{% endblock %}
+{% block content %}
+
+    <div class="container">
+
+
+           <h1> Последние обновления на сайте</h1>
+                {% for recipe in recipes %}
+                    {% include "includes/recipe_card.html" with recipe=recipe %}
+                {% endfor %}
+    </div>
+
+
+{% endblock %}
