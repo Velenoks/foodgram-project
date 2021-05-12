@@ -33,12 +33,14 @@ class Recipe(models.Model):
     time_cooking = models.PositiveIntegerField(verbose_name='Время приготовления', help_text='Время приготовления в минутах')
     ingredient = models.ManyToManyField(Ingredient, through='RecipeIngredient', verbose_name='Ингридиент')
     image = models.ImageField(upload_to='recipe/', verbose_name='Картинка', default=0)
+    pub_date = models.DateTimeField('date published', auto_now_add=True)
     tag = models.ManyToManyField(Tag, verbose_name='Прием пищи')
 
     def __str__(self):
         return self.title
 
     class Meta:
+        ordering = ('-pub_date',)
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
 

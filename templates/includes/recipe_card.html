@@ -1,6 +1,11 @@
 
 <div class="card" data-id="120">
-    <a href="#" class="link" target="_blank"><img src="static/images/testCardImg.png" alt="Какой-то текст" class="card__image"></a>
+    <a href="#" class="link" target="_blank">
+     {% load thumbnail %}
+    {% thumbnail recipe.image "365x240" crop="center" upscale=True as im %}
+      <img src="{{ im.url }}" alt="Изображение {{ recipe.title }}" class="card__image" title="{{ recipe.title }}">
+    {% endthumbnail %}
+    </a>
     <div class="card__body">
         <a class="card__title link" href="#" target="_blank">{{ recipe.title }}</a>
 

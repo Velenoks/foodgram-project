@@ -3,10 +3,8 @@
 {% block header %}{% endblock %}
 {% block content %}
 
-    <div class="container">
+    <div class="card-list">
 
-
-           <h1> Последние обновления на сайте</h1>
                 {% for recipe in recipes %}
                     {% include "includes/recipe_card.html" with recipe=recipe %}
                 {% endfor %}

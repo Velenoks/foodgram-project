@@ -19,9 +19,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # My apps
-    'recipes'
+    'recipes',
+    'users',
 
     # Install apps
+    'sorl.thumbnail'
 ]
 
 MIDDLEWARE = [
@@ -100,3 +102,5 @@ LOGIN_URL = "/auth/login/"
 LOGIN_REDIRECT_URL = "index"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'users.User'
