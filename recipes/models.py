@@ -4,15 +4,6 @@ from django.db import models
 
 USER = get_user_model()
 
-class Tag(models.Model):
-    title = models.CharField(max_length=20, verbose_name='Название')
-
-    def __str__(self):
-        return self.title
-
-    class Meta:
-        verbose_name = 'Прием пищи'
-
 
 class Ingredient(models.Model):
     title = models.CharField(max_length=256, verbose_name='Название')
@@ -34,7 +25,9 @@ class Recipe(models.Model):
     ingredient = models.ManyToManyField(Ingredient, through='RecipeIngredient', verbose_name='Ингридиент')
     image = models.ImageField(upload_to='recipe/', verbose_name='Картинка', default=0)
     pub_date = models.DateTimeField('date published', auto_now_add=True)
-    tag = models.ManyToManyField(Tag, verbose_name='Прием пищи')
+    tag_breakfast = models.BooleanField(verbose_name='Завтрак', default=False)
+    tag_lunch = models.BooleanField(verbose_name='Обед', default=True)
+    tag_dinner = models.BooleanField(verbose_name='Ужин', default=False)
 
     def __str__(self):
         return self.title
@@ -49,3 +42,24 @@ class RecipeIngredient(models.Model):
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     count = models.PositiveIntegerField(verbose_name='Количество')
+
+
+class Follow(models.Model):
+    user = models.ForeignKey(
+        USER,
+        on_delete=models.CASCADE,
+        verbose_name="Пользователь",
+        related_name="follower",
+    )
+    author = models.ForeignKey(
+        USER,
+        on_delete=models.CASCADE,
+        verbose_name="Автор",
+        related_name="following",
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "author"],
+                                    name="unique_follow"),
+        ]

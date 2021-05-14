@@ -10,6 +10,5 @@ class RecipeAdmin(admin.ModelAdmin):
     inlines = [MemdershipInline]
 
 admin.site.register(Ingredient)
-admin.site.register(Tag)
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(RecipeIngredient)

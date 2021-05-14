@@ -2,6 +2,12 @@
 {% block title %}Регистрация{% endblock %}
 {% block content %}
 
+<head>
+    {% load static %}
+        <link rel="stylesheet" href="{% static './pages/form.css' %}">
+</head>
+
+
                     {% for error in form.errors %}
                         <div class=class="form__error">
                             {{ error }}
