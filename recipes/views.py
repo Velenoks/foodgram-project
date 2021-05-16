@@ -1,13 +1,19 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db.models import Exists, OuterRef
 from django.shortcuts import render, redirect, get_object_or_404
 
-from recipes.forms import RecipeForm
-from recipes.models import Recipe, Follow
+from recipes.forms import IngredientRecipeForm, RecipeForm
+from recipes.models import Recipe, Follow, USER, Favorite
 
 
 def index(request):
-    recipes = Recipe.objects.all()
+    recipes = Recipe.objects.all().annotate(is_favorite=Exists(
+            Favorite.objects.filter(
+                user_id=request.user.pk,
+                recipe_id=OuterRef('pk'),
+            ),
+        ))
     paginator = Paginator(recipes, 6)
     page_number = request.GET.get("page")
     page = paginator.get_page(page_number)
@@ -19,6 +25,29 @@ def index(request):
             "paginator": paginator,
         },
     )
+
+
+def user_recipe(request, username):
+    author = get_object_or_404(USER, username=username)
+    recipes = Recipe.objects.filter(author=author).annotate(is_favorite=Exists(
+            Favorite.objects.filter(
+                user_id=request.user.pk,
+                recipe_id=OuterRef('pk'),
+            ),
+        ))
+    paginator = Paginator(recipes, 6)
+    page_number = request.GET.get("page")
+    page = paginator.get_page(page_number)
+    return render(
+        request,
+        "user_recipe.html",
+        {
+            "page": page,
+            "paginator": paginator,
+            "author": author
+        },
+    )
+
 
 @login_required()
 def new_recipe(request):
