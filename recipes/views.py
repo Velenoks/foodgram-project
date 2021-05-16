@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
 
 from recipes.forms import RecipeForm
@@ -7,11 +8,15 @@ from recipes.models import Recipe, Follow
 
 def index(request):
     recipes = Recipe.objects.all()
+    paginator = Paginator(recipes, 6)
+    page_number = request.GET.get("page")
+    page = paginator.get_page(page_number)
     return render(
         request,
         "index.html",
         {
-            "recipes": recipes,
+            "page": page,
+            "paginator": paginator,
         },
     )
 

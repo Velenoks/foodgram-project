@@ -1,11 +1,13 @@
 import os
-from pathlib import Path
+from dotenv import load_dotenv
 
+
+load_dotenv()
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SECRET_KEY = 'django-insecure-x^a$^1#ezf!*m-^orns^6ck896h2%=y0so11%q1*rv=_pru489'
+SECRET_KEY = os.getenv("SECRET_KEY")
 
-DEBUG = True
+DEBUG = int(os.getenv("DEBUG"))
 
 ALLOWED_HOSTS = []
 
@@ -104,3 +106,14 @@ LOGIN_REDIRECT_URL = "index"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'users.User'
+
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+    EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
+    EMAIL_HOST_USER = 'apidebug@news.ru'
+else:
+    EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
+    EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "your_account@gmail.com")
+    EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "your_password")
+    EMAIL_PORT = int(os.getenv("EMAIL_PORT", default=587))
+    EMAIL_USE_TLS = int(os.getenv("EMAIL_USE_TLS", default=1))
