@@ -3,7 +3,7 @@ from django.core.paginator import Paginator
 from django.db.models import Exists, OuterRef
 from django.shortcuts import render, redirect, get_object_or_404
 
-from recipes.forms import IngredientRecipeForm, RecipeForm
+from recipes.forms import RecipeForm
 from recipes.models import Recipe, Follow, USER, Favorite
 
 
@@ -71,14 +71,14 @@ def new_recipe(request):
     )
 
 def recipe_view(request, recipe_id):
-    recipe = get_object_or_404(Recipe, id=recipe_id)
-    user = recipe.user
-    following = False
-    if request.user.is_authenticated:
-        if Follow.objects.filter(user=request.user, author=user).exists():
-            following = True
+    recipe = Recipe.objects.filter(pk=recipe_id).annotate(is_favorite=Exists(
+            Favorite.objects.filter(
+                user_id=request.user.pk,
+                recipe_id=recipe_id,
+            ),
+        ))
     return render(
         request,
         "recipe.html",
-        {"recipe": recipe, "user": user, "following": following }
+        {"recipe": recipe[0]}
     )
