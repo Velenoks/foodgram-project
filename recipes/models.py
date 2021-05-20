@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.db.models import Exists, OuterRef
 
 USER = get_user_model()
 
@@ -15,16 +14,6 @@ class Ingredient(models.Model):
     class Meta:
         verbose_name = 'Ингридиент'
         verbose_name_plural = 'Ингридиенты'
-
-
-class RecipeQuerySet(models.QuerySet):
-    def with_is_favorite(self, user_id):
-        return self.annotate(is_favorite=Exists(
-            Favorite.objects.filter(
-                user_id=user_id,
-                recipe_id=OuterRef('pk'),
-            ),
-        ))
 
 
 class Recipe(models.Model):

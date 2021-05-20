@@ -9,12 +9,6 @@
 
 {% block content %}
 
-      {% for error in form.errors %}
-          <div class="form__error">
-              {{ error }}
-          </div>
-      {% endfor %}
-
 <div class="main__header">
     <h1 class="main__title">Регистрация</h1>
 </div>
@@ -29,7 +23,7 @@
                 {% if field.help_text %}
                 <small id="{{ field.id_for_label }}-help">{{ field.help_text|safe }}</small>
                 {% endif %}
-                <span class="form__error"></span>
+                <span class="form__error">{{ field.errors }}</span>
             </div>
         </div>
         {% endfor %}

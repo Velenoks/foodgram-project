@@ -22,7 +22,6 @@
 
 {% block content %}
 
-
     <div class="main__header">
         <h1 class="main__title">{{ title }}</h1>
     </div>
@@ -33,7 +32,7 @@
                 <label for="{{ form.title.id_for_label }}" class="form__label">{{ form.title.label }}</label>
                 <div class="form__field-group">
                     <input type="text" name="{{ form.title.name }}" id="{{ form.title.id_for_label }}" class="form__input">
-                    <span class="form__error"></span>
+                    <span class="form__error">{{ form.title.errors }}</span>
                 </div>
             </div>
             <div class="form__group">
@@ -76,16 +75,29 @@
                     <span class="form__error"></span>
                 </div>
             </div>
-            {% for field in form %}
-              <div class="form__group">
-                <label for="{{ field.id_for_label }}" class="form__label">{{ field.label }}</label>
-                <div class="form__field-group">
-                  {{ field }}
-                    <span class="form__error"></span>
+            <div class="form__group">
+                <label for="{{ form.time_cooking.id_for_label }}" class="form__label">{{ form.time_cooking.label }}</label>
+                <div class="form__field-group form__field-group_time">
+                    <input type="text" id="{{ form.time_cooking.id_for_label }}" name="{{ form.time_cooking.name }}" class="form__input">
+                    <label for="id_time" class="form__label">минут</label>
+                    <span class="form__error">{{ form.time_cooking.errors }}</span>
                 </div>
-              </div>
-            {% endfor %}
-
+            </div>
+            <div class="form__group">
+                <label for="{{ form.text.id_for_label }}" class="form__label">{{ form.text.label }}</label>
+                <div class="form__field-group">
+                    <textarea name="{{ form.text.name }}" id="{{ form.text.id_for_label }}" rows="8" class="form__textarea"></textarea>
+                    <span class="form__error">{{ form.text.errors }}</span>
+                </div>
+            </div>
+            <div class="form__group">
+                <span class="form__label">Загрузить фото</span>
+                <div class="form__field-group">
+                    <label for="{{ form.image.auto_id }}" class="form__file-button">{{ form.image.label }}</label>
+                    <input type="file" class="form__file" name="image" id="id_image">
+                    <span class="form__error">{{ form.image.errors }}</span>
+                </div>
+            </div>
             <div class="form__footer">
                 <button class="button button_style_blue">{{ save_button }}</button>
             </div>

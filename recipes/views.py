@@ -50,6 +50,46 @@ def user_recipe(request, username):
 
 
 @login_required()
+def favorite(request):
+    recipes = Recipe.objects.all().annotate(is_favorite=Exists(
+            Favorite.objects.filter(
+                user_id=request.user.pk,
+                recipe_id=OuterRef('pk'),
+            ),
+        )).filter(is_favorite=True)
+    paginator = Paginator(recipes, 6)
+    page_number = request.GET.get("page")
+    page = paginator.get_page(page_number)
+    return render(
+        request,
+        "favorite.html",
+        {
+            "page": page,
+            "paginator": paginator,
+        },
+    )
+
+
+@login_required()
+def follow(request):
+    users = USER.objects.filter()
+    recipes = Recipe.objects.filter(
+        author__following__user=request.user
+    )
+    paginator = Paginator(recipes, 6)
+    page_number = request.GET.get("page")
+    page = paginator.get_page(page_number)
+    return render(
+        request,
+        "favorite.html",
+        {
+            "page": page,
+            "paginator": paginator,
+        },
+    )
+
+
+@login_required()
 def new_recipe(request):
     title = "Создание рецепта"
     save_button = "Создать репепт"
@@ -76,9 +116,10 @@ def recipe_view(request, recipe_id):
                 user_id=request.user.pk,
                 recipe_id=recipe_id,
             ),
-        ))
+        ))[0]
+    follow = Follow.objects.filter(user=request.user, author=recipe.author).exists()
     return render(
         request,
         "recipe.html",
-        {"recipe": recipe[0]}
+        {"recipe": recipe, "follow": follow}
     )
