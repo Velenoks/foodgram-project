@@ -1,0 +1,31 @@
+<div class="card-user" data-author="{{ author.pk }}">
+    <div class="card-user__header">
+        <h2 class="card-user__title">{{ author.get_full_name }}</h2>
+    </div>
+    <div class="card-user__body">
+        <ul class="card-user__items">
+            {%  for recipe in author.recipes.all|slice:":3" %}
+            <li class="card-user__item">
+                <div class="recipe">
+                    <a href="{% url 'recipe' recipe.pk %}" class="link" target="_blank">
+                    {% load thumbnail %}
+                    {% thumbnail recipe.image "365x240" crop="center" upscale=True as im %}
+                    <img src="{{ im.url }}" alt="Изображение {{ recipe.title }}" class="recipe__image">
+                    {% endthumbnail %}
+                    </a>
+                    <h3 class="recipe__title">{{ recipe.title }}</h3>
+                    <p class="recipe__text"><span class="icon-time"></span> {{ recipe.time }} мин.</p>
+                </div>
+            </li>
+            {% endfor %}
+            {% if author.recipes_count > 3 %}
+            <li class="card-user__item">
+                <a href="{% url 'user_recipe' author.username %}" class="card-user__link link">Еще {{ author.recipes_count }} рецептов...</a>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+    <div class="card-user__footer">
+        <button class="button button_style_light-blue button_size_auto" name="subscribe">Отписаться</button>
+    </div>
+</div>

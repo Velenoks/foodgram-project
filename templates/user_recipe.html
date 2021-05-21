@@ -46,8 +46,13 @@
         </div>
 
         {% if user != author %}
-        <div class="author-subscribe" data-author="323">
-            <p style="padding: 0 0 2em 0;"><a class="button button_style_light-blue" href="#">Подписаться на автора</a></p>
+        <div class="author-subscribe" data-author="{{ author.pk }}">
+            <p style="padding: 0 0 2em 0;"><button class="button button_style_light-blue button_size_subscribe" name="subscribe" data-out>
+            {% if follow %}
+            Отписаться от автора
+            {% else %}
+            Подписаться на автора
+            {% endif %}</button></p>
         </div>
         {% endif %}
 

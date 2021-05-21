@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db.models import Exists, OuterRef
+from django.db.models import Exists, OuterRef, Count
 from django.shortcuts import render, redirect, get_object_or_404
 
 from recipes.forms import RecipeForm
@@ -29,6 +29,7 @@ def index(request):
 
 def user_recipe(request, username):
     author = get_object_or_404(USER, username=username)
+    follow = Follow.objects.filter(user=request.user, author=author).exists()
     recipes = Recipe.objects.filter(author=author).annotate(is_favorite=Exists(
             Favorite.objects.filter(
                 user_id=request.user.pk,
@@ -44,7 +45,8 @@ def user_recipe(request, username):
         {
             "page": page,
             "paginator": paginator,
-            "author": author
+            "author": author,
+            "follow": follow
         },
     )
 
@@ -72,16 +74,13 @@ def favorite(request):
 
 @login_required()
 def follow(request):
-    users = USER.objects.filter()
-    recipes = Recipe.objects.filter(
-        author__following__user=request.user
-    )
-    paginator = Paginator(recipes, 6)
+    users = USER.objects.filter(following__user=request.user).annotate(recipes_count=Count('recipes'))
+    paginator = Paginator(users, 6)
     page_number = request.GET.get("page")
     page = paginator.get_page(page_number)
     return render(
         request,
-        "favorite.html",
+        "follow.html",
         {
             "page": page,
             "paginator": paginator,
@@ -110,6 +109,7 @@ def new_recipe(request):
         },
     )
 
+
 def recipe_view(request, recipe_id):
     recipe = Recipe.objects.filter(pk=recipe_id).annotate(is_favorite=Exists(
             Favorite.objects.filter(
@@ -118,6 +118,7 @@ def recipe_view(request, recipe_id):
             ),
         ))[0]
     follow = Follow.objects.filter(user=request.user, author=recipe.author).exists()
+    print(follow)
     return render(
         request,
         "recipe.html",

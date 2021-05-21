@@ -11,7 +11,7 @@ views_patterns = [
     path('recipe/<int:recipe_id>/', views.recipe_view, name='recipe'),
     path('favorite/', views.favorite, name='favorite'),
     path('<str:username>/', views.user_recipe, name='user_recipe'),
-    path('favorites/', AddToFavorites.as_view()),
+    path('follow', views.follow, name='follow')
 ]
 
 api_patterns = [
