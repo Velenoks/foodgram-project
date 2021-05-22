@@ -13,13 +13,19 @@ class RecipeForm(forms.ModelForm):
         if not (tag_breakfast or tag_lunch or tag_dinner):
             text_error = 'Необходимо выбрать хотя бы один тег'
             self.add_error('tag_breakfast', text_error)
-        if not cleaned_data.get('nameIngredient_1'):
+        error_ingredient = True
+        for key in self.data.keys():
+            if 'nameIngredient' in key:
+                error_ingredient = False
+        if error_ingredient:
             text_error = 'Вы забыли добавить ингридиенты'
             self.add_error('tag_lunch', text_error)
         return cleaned_data
 
 
     class Meta:
+        image = forms.FileField(widget=forms.ClearableFileInput(attrs={'class': 'form__file'}))
+
         model = Recipe
         fields = (
             'title', 'tag_breakfast', 'tag_lunch', 'tag_dinner',

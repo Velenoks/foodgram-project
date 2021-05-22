@@ -9,6 +9,7 @@ views_patterns = [
     path('', views.index, name='index'),
     path('new/', views.new_recipe, name='new_recipe'),
     path('recipe/<int:recipe_id>/', views.recipe_view, name='recipe'),
+    path('recipe/<int:recipe_id>/edit/', views.edit_recipe, name='edit_recipe'),
     path('favorite/', views.favorite, name='favorite'),
     path('<str:username>/', views.user_recipe, name='user_recipe'),
     path('follow', views.follow, name='follow')

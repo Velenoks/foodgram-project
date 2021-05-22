@@ -89,3 +89,24 @@ class Favorite(models.Model):
         ]
         verbose_name = 'Избранный рецепт'
         verbose_name_plural = 'Избранные рецепты'
+
+    class CartItem(models.Model):
+        user = models.ForeignKey(
+            USER,
+            related_name='shopitems',
+            on_delete=models.CASCADE
+        )
+        recipe = models.ForeignKey(
+            Recipe,
+            verbose_name='Рецепт',
+            related_name='carts',
+            on_delete=models.CASCADE
+        )
+
+        class Meta:
+            verbose_name = 'Список покупок'
+            verbose_name_plural = 'Списки покупок'
+            constraints = [
+                models.UniqueConstraint(fields=['user', 'recipe', ],
+                                        name='two_recipes_in_one_cart_impossible')
+            ]

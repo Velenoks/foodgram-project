@@ -10,11 +10,11 @@ from recipes.parser import parser_ingredients
 
 def index(request):
     recipes = Recipe.objects.all().annotate(is_favorite=Exists(
-            Favorite.objects.filter(
-                user_id=request.user.pk,
-                recipe_id=OuterRef('pk'),
-            ),
-        ))
+        Favorite.objects.filter(
+            user_id=request.user.pk,
+            recipe_id=OuterRef('pk'),
+        ),
+    ))
     paginator = Paginator(recipes, 6)
     page_number = request.GET.get("page")
     page = paginator.get_page(page_number)
@@ -32,11 +32,11 @@ def user_recipe(request, username):
     author = get_object_or_404(USER, username=username)
     follow = Follow.objects.filter(user=request.user, author=author).exists()
     recipes = Recipe.objects.filter(author=author).annotate(is_favorite=Exists(
-            Favorite.objects.filter(
-                user_id=request.user.pk,
-                recipe_id=OuterRef('pk'),
-            ),
-        ))
+        Favorite.objects.filter(
+            user_id=request.user.pk,
+            recipe_id=OuterRef('pk'),
+        ),
+    ))
     paginator = Paginator(recipes, 6)
     page_number = request.GET.get("page")
     page = paginator.get_page(page_number)
@@ -55,11 +55,11 @@ def user_recipe(request, username):
 @login_required()
 def favorite(request):
     recipes = Recipe.objects.all().annotate(is_favorite=Exists(
-            Favorite.objects.filter(
-                user_id=request.user.pk,
-                recipe_id=OuterRef('pk'),
-            ),
-        )).filter(is_favorite=True)
+        Favorite.objects.filter(
+            user_id=request.user.pk,
+            recipe_id=OuterRef('pk'),
+        ),
+    )).filter(is_favorite=True)
     paginator = Paginator(recipes, 6)
     page_number = request.GET.get("page")
     page = paginator.get_page(page_number)
@@ -75,7 +75,8 @@ def favorite(request):
 
 @login_required()
 def follow(request):
-    users = USER.objects.filter(following__user=request.user).annotate(recipes_count=Count('recipes')).order_by('username')
+    users = USER.objects.filter(following__user=request.user).annotate(recipes_count=Count('recipes')).order_by(
+        'username')
     paginator = Paginator(users, 6)
     page_number = request.GET.get("page")
     page = paginator.get_page(page_number)
@@ -96,20 +97,47 @@ def new_recipe(request):
     if request.POST:
         ingredients = parser_ingredients(request.POST)
     form = RecipeForm(request.POST or None,
-                    files=request.FILES or None)
+                      files=request.FILES or None)
     if form.is_valid():
         create_recipe = form.save(commit=False)
         create_recipe.author = request.user
         create_recipe.save()
         recipe = Recipe.objects.latest('pk')
         for ingredient in ingredients:
-            print(ingredient, recipe.text)
             RecipeIngredient.objects.create(recipe=recipe, ingredient=ingredient[0], count=ingredient[1])
         return redirect("index")
     return render(
         request,
-        "new_recipe.html",
+        "new_and_edit_recipe.html",
         {
+            "form": form,
+            "title": title,
+            "save_button": save_button
+        },
+    )
+
+
+@login_required()
+def edit_recipe(request, recipe_id):
+    title = "Редактирование рецепта"
+    save_button = "Сохранить"
+    recipe = get_object_or_404(Recipe, pk=recipe_id, author=request.user)
+    if request.POST:
+        ingredients = parser_ingredients(request.POST)
+    form = RecipeForm(request.POST or None,
+                      files=request.FILES or None,
+                      instance=recipe)
+    if form.is_valid():
+        form.save()
+        RecipeIngredient.objects.filter(recipe=recipe).delete()
+        for ingredient in ingredients:
+            RecipeIngredient.objects.create(recipe=recipe, ingredient=ingredient[0], count=ingredient[1])
+        return redirect("recipe", recipe_id=recipe_id)
+    return render(
+        request,
+        "new_and_edit_recipe.html",
+        {
+            "recipe": recipe,
             "form": form,
             "title": title,
             "save_button": save_button
@@ -119,11 +147,11 @@ def new_recipe(request):
 
 def recipe_view(request, recipe_id):
     recipe = Recipe.objects.filter(pk=recipe_id).annotate(is_favorite=Exists(
-            Favorite.objects.filter(
-                user_id=request.user.pk,
-                recipe_id=recipe_id,
-            ),
-        ))[0]
+        Favorite.objects.filter(
+            user_id=request.user.pk,
+            recipe_id=recipe_id,
+        ),
+    ))[0]
     follow = Follow.objects.filter(user=request.user, author=recipe.author).exists()
     return render(
         request,
