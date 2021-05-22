@@ -145,6 +145,14 @@ def edit_recipe(request, recipe_id):
     )
 
 
+@login_required()
+def delete_recipe(request, recipe_id):
+    recipe = get_object_or_404(Recipe, pk=recipe_id, author=request.user)
+    print(recipe)
+    recipe.delete()
+    return redirect("user_recipe", username=request.user.username)
+
+
 def recipe_view(request, recipe_id):
     recipe = Recipe.objects.filter(pk=recipe_id).annotate(is_favorite=Exists(
         Favorite.objects.filter(
