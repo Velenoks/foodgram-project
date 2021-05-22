@@ -6,10 +6,10 @@ USER = get_user_model()
 
 class Ingredient(models.Model):
     title = models.CharField(max_length=256, verbose_name='Название')
-    unit = models.CharField(max_length=100, verbose_name='Единицы измерения')
+    dimension = models.CharField(max_length=100, verbose_name='Единицы измерения')
 
     def __str__(self):
-        return self.title
+        return f"{self.title} {self.dimension}"
 
     class Meta:
         verbose_name = 'Ингридиент'
@@ -25,7 +25,7 @@ class Recipe(models.Model):
     image = models.ImageField(upload_to='recipe/', verbose_name='Картинка', default=0)
     pub_date = models.DateTimeField('date published', auto_now_add=True)
     tag_breakfast = models.BooleanField(verbose_name='Завтрак', default=False)
-    tag_lunch = models.BooleanField(verbose_name='Обед', default=True)
+    tag_lunch = models.BooleanField(verbose_name='Обед', default=False)
     tag_dinner = models.BooleanField(verbose_name='Ужин', default=False)
 
     def __str__(self):

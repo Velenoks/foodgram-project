@@ -19,6 +19,7 @@ api_patterns = [
     path('favorites/<int:pk>/', RemoveFromFavorites.as_view()),
     path('subscriptions/', AddToSubscriptions.as_view()),
     path('subscriptions/<int:pk>/', RemoveFromSubscriptions.as_view()),
+    path('ingredients/', IngredientList.as_view()),
 ]
 
 urlpatterns = [

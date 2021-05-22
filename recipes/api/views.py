@@ -1,8 +1,10 @@
-from rest_framework import status
+from django.db.models import Q
+from rest_framework import status, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from ..models import Favorite, Follow
+from .serializers import IngredientSerializer
+from ..models import Favorite, Follow, Ingredient
 
 
 class AddToFavorites(APIView):
@@ -33,3 +35,23 @@ class RemoveFromSubscriptions(APIView):
     def delete(self, request, pk, format=None):
         Follow.objects.filter(author_id=pk, user=request.user).delete()
         return Response({'success': True}, status=status.HTTP_200_OK)
+
+
+class IngredientList(generics.ListAPIView):
+    serializer_class = IngredientSerializer
+
+    def get(self, request, *args, **kwargs):
+        query = request.query_params.get('query')
+        if not query or len(query) >= 3:
+            return super().get(request, *args, **kwargs)
+        return Response([{'warning': 'Enter minimum 3 symbols for a hint'}, ])
+
+    def get_queryset(self):
+        query = self.request.query_params.get('query')
+        if query:
+            words = self.request.query_params.get('query').split(' ')
+            db_query = Q()
+            for word in words:
+                db_query &= Q(title__contains=word[:-1].lower())
+            return Ingredient.objects.all().filter(db_query)[:20]
+        return Ingredient.objects.all()

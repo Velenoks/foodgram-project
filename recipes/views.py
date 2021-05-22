@@ -4,7 +4,8 @@ from django.db.models import Exists, OuterRef, Count
 from django.shortcuts import render, redirect, get_object_or_404
 
 from recipes.forms import RecipeForm
-from recipes.models import Recipe, Follow, USER, Favorite
+from recipes.models import Recipe, Follow, USER, Favorite, RecipeIngredient
+from recipes.parser import parser_ingredients
 
 
 def index(request):
@@ -74,7 +75,7 @@ def favorite(request):
 
 @login_required()
 def follow(request):
-    users = USER.objects.filter(following__user=request.user).annotate(recipes_count=Count('recipes'))
+    users = USER.objects.filter(following__user=request.user).annotate(recipes_count=Count('recipes')).order_by('username')
     paginator = Paginator(users, 6)
     page_number = request.GET.get("page")
     page = paginator.get_page(page_number)
@@ -92,12 +93,18 @@ def follow(request):
 def new_recipe(request):
     title = "Создание рецепта"
     save_button = "Создать репепт"
+    if request.POST:
+        ingredients = parser_ingredients(request.POST)
     form = RecipeForm(request.POST or None,
                     files=request.FILES or None)
     if form.is_valid():
         create_recipe = form.save(commit=False)
-        create_recipe.user = request.user
+        create_recipe.author = request.user
         create_recipe.save()
+        recipe = Recipe.objects.latest('pk')
+        for ingredient in ingredients:
+            print(ingredient, recipe.text)
+            RecipeIngredient.objects.create(recipe=recipe, ingredient=ingredient[0], count=ingredient[1])
         return redirect("index")
     return render(
         request,
@@ -118,7 +125,6 @@ def recipe_view(request, recipe_id):
             ),
         ))[0]
     follow = Follow.objects.filter(user=request.user, author=recipe.author).exists()
-    print(follow)
     return render(
         request,
         "recipe.html",
