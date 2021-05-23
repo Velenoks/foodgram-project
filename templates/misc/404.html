@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% block page_title %}Рецепты{% endblock %}
+{% block title %} Ошибка 404 {% endblock %}
+
 {% block static_css %}
 
 {% load static %}
@@ -30,17 +31,14 @@
 
 {% block content %}
 
-    {% include "includes/tags.html" %}
 
-    <div class="card-list">
-
-                {% for recipe in page %}
-                    {% include "includes/recipe_card.html" with recipe=recipe %}
-                {% endfor %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>Ошибка 404</h1>
+        <p class="lead">Страница <code>{{ path }}</code> не найдена</p>
+        <p class="lead"><a href="{% url  'index' %}">Вернуться на главную</a></p>
     </div>
+</div>
 
-        {% if page.has_other_pages %}
-            {% include "includes/paginator.html" with items=page paginator=paginator%}
-        {% endif %}
 
-{% endblock %}
+{% endblock %} l>

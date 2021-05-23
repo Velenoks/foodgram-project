@@ -1,11 +1,13 @@
+import datetime
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Exists, OuterRef, Count
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
 from recipes.forms import RecipeForm
 from recipes.models import Recipe, Follow, USER, Favorite, RecipeIngredient, PurchaseItem
-from recipes.parser import parser_ingredients
+from recipes.helpers import parser_ingredients, ingredients_in_text
 
 
 def index(request):
@@ -20,6 +22,13 @@ def index(request):
             recipe_id=OuterRef('pk'),
         ),
     ))
+    tags = request.GET.getlist('tag')
+    if 'tag_breakfast' in tags:
+        recipes = recipes.filter(tag_breakfast=True)
+    if 'tag_lunch' in tags:
+        recipes = recipes.filter(tag_lunch=True)
+    if 'tag_dinner' in tags:
+        recipes = recipes.filter(tag_dinner=True)
     paginator = Paginator(recipes, 6)
     page_number = request.GET.get("page")
     page = paginator.get_page(page_number)
@@ -47,6 +56,13 @@ def user_recipe(request, username):
             recipe_id=OuterRef('pk'),
         ),
     ))
+    tags = request.GET.getlist('tag')
+    if 'tag_breakfast' in tags:
+        recipes = recipes.filter(tag_breakfast=True)
+    if 'tag_lunch' in tags:
+        recipes = recipes.filter(tag_lunch=True)
+    if 'tag_dinner' in tags:
+        recipes = recipes.filter(tag_dinner=True)
     paginator = Paginator(recipes, 6)
     page_number = request.GET.get("page")
     page = paginator.get_page(page_number)
@@ -75,6 +91,13 @@ def favorite(request):
             recipe_id=OuterRef('pk'),
         ),
     ))
+    tags = request.GET.getlist('tag')
+    if 'tag_breakfast' in tags:
+        recipes = recipes.filter(tag_breakfast=True)
+    if 'tag_lunch' in tags:
+        recipes = recipes.filter(tag_lunch=True)
+    if 'tag_dinner' in tags:
+        recipes = recipes.filter(tag_dinner=True)
     paginator = Paginator(recipes, 6)
     page_number = request.GET.get("page")
     page = paginator.get_page(page_number)
@@ -199,4 +222,37 @@ def purchase_view(request):
         request,
         "purchases_list.html",
         {"recipes": recipes}
+    )
+
+
+@login_required()
+def download_purchases(request):
+    purchases = PurchaseItem.objects.filter(user=request.user)
+    recipes = Recipe.objects.filter(purchase__in=purchases)
+    full_name = request.user.get_full_name()
+    items = RecipeIngredient.objects.filter(recipe__in=recipes)
+    content = f"Время {datetime.datetime.now()}\n" \
+              f"Всего репептов - {recipes.count()}\n" \
+              f"Список составлен для {full_name}\n" \
+              "Ингридиенты:\n" + ingredients_in_text(items)
+    filename = f"purchase_{request.user.username}.txt"
+    response = HttpResponse(content, content_type="text/plain")
+    response["Content-Disposition"] = "attachment; filename={0}".format(filename)
+    return response
+
+
+def page_not_found(request, exception):
+    return render(
+        request,
+        "misc/404.html",
+        {"path": request.path},
+        status=404
+    )
+
+
+def server_error(request):
+    return render(
+        request,
+        "misc/500.html",
+        status=500
     )

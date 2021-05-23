@@ -14,7 +14,8 @@ views_patterns = [
     path('favorite/', views.favorite, name='favorite'),
     path('<str:username>/', views.user_recipe, name='user_recipe'),
     path('follow', views.follow, name='follow'),
-    path('purchase', views.purchase_view, name='purchase')
+    path('purchase', views.purchase_view, name='purchase'),
+    path('purchase/download/', views.download_purchases, name='download_purchases'),
 ]
 
 api_patterns = [
