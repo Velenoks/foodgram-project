@@ -11,7 +11,9 @@ from recipes.helpers import parser_ingredients, ingredients_in_text
 
 
 def index(request):
-    recipes = Recipe.objects.all().annotate(is_favorite=Exists(
+    recipes = Recipe.objects.all()
+    if request.user.is_authenticated:
+        recipes = recipes.annotate(is_favorite=Exists(
         Favorite.objects.filter(
             user=request.user,
             recipe_id=OuterRef('pk'),
@@ -44,8 +46,11 @@ def index(request):
 
 def user_recipe(request, username):
     author = get_object_or_404(USER, username=username)
-    follow = Follow.objects.filter(user=request.user, author=author).exists()
-    recipes = Recipe.objects.filter(author=author).annotate(is_favorite=Exists(
+    follow = False
+    recipes = Recipe.objects.filter(author=author)
+    if request.user.is_authenticated:
+        follow = Follow.objects.filter(user=request.user, author=author).exists()
+        recipes = recipes.annotate(is_favorite=Exists(
         Favorite.objects.filter(
             user=request.user,
             recipe_id=OuterRef('pk'),
@@ -191,22 +196,23 @@ def delete_recipe(request, recipe_id):
 
 
 def recipe_view(request, recipe_id):
-    recipe = Recipe.objects.filter(pk=recipe_id).annotate(is_favorite=Exists(
+    recipe = Recipe.objects.filter(pk=recipe_id)
+    follow = False
+    if request.user.is_authenticated:
+        recipe = recipe.annotate(is_favorite=Exists(
         Favorite.objects.filter(
             user_id=request.user.pk,
             recipe_id=recipe_id,
-        ),
-    )).annotate(is_purchase=Exists(
+        ))).annotate(is_purchase=Exists(
         PurchaseItem.objects.filter(
             user=request.user,
             recipe_id=OuterRef('pk'),
-        ),
-    ))[0]
-    follow = Follow.objects.filter(user=request.user, author=recipe.author).exists()
+        )))
+        follow = Follow.objects.filter(user=request.user, author=recipe.author).exists()
     return render(
         request,
         "recipe.html",
-        {"recipe": recipe, "follow": follow}
+        {"recipe": recipe[0], "follow": follow}
     )
 
 

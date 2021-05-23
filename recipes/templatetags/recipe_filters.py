@@ -22,7 +22,7 @@ def get_filter_link(request, tag):
     return new_request.urlencode()
 
 @register.filter(name='construct_page_link')
-def construct_page_link(request, page: int):
+def construct_page_link(request, page):
     new_request = request.GET.copy()
     new_request.setlist('page', [str(page)])
     return new_request.urlencode()
