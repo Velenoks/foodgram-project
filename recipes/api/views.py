@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .serializers import IngredientSerializer
-from ..models import Favorite, Follow, Ingredient
+from ..models import Favorite, Follow, Ingredient, PurchaseItem
 
 
 class AddToFavorites(APIView):
@@ -37,6 +37,21 @@ class RemoveFromSubscriptions(APIView):
         return Response({'success': True}, status=status.HTTP_200_OK)
 
 
+class AddPurchaseItem(APIView):
+    def post(self, request, format=None):
+        PurchaseItem.objects.get_or_create(
+            user=request.user,
+            recipe_id=request.data['id'],
+        )
+        return Response({'success': True}, status=status.HTTP_200_OK)
+
+
+class RemovePurchaseItem(APIView):
+    def delete(self, request, pk, format=None):
+        PurchaseItem.objects.filter(recipe_id=pk, user=request.user).delete()
+        return Response({'success': True}, status=status.HTTP_200_OK)
+
+
 class IngredientList(generics.ListAPIView):
     serializer_class = IngredientSerializer
 
@@ -44,7 +59,7 @@ class IngredientList(generics.ListAPIView):
         query = request.query_params.get('query')
         if not query or len(query) >= 3:
             return super().get(request, *args, **kwargs)
-        return Response([{'warning': 'Enter minimum 3 symbols for a hint'}, ])
+        return Response([{'warning': 'Введите минимум 3 символа'}, ])
 
     def get_queryset(self):
         query = self.request.query_params.get('query')
@@ -53,5 +68,5 @@ class IngredientList(generics.ListAPIView):
             db_query = Q()
             for word in words:
                 db_query &= Q(title__contains=word[:-1].lower())
-            return Ingredient.objects.all().filter(db_query)[:20]
+            return Ingredient.objects.all().filter(db_query)[:30]
         return Ingredient.objects.all()

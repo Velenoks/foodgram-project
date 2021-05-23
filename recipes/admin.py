@@ -9,6 +9,7 @@ class MemdershipInline(admin.TabularInline):
 class RecipeAdmin(admin.ModelAdmin):
     inlines = [MemdershipInline]
 
+admin.site.register(PurchaseItem)
 admin.site.register(Favorite)
 admin.site.register(Follow)
 admin.site.register(Ingredient)

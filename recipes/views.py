@@ -4,14 +4,19 @@ from django.db.models import Exists, OuterRef, Count
 from django.shortcuts import render, redirect, get_object_or_404
 
 from recipes.forms import RecipeForm
-from recipes.models import Recipe, Follow, USER, Favorite, RecipeIngredient
+from recipes.models import Recipe, Follow, USER, Favorite, RecipeIngredient, PurchaseItem
 from recipes.parser import parser_ingredients
 
 
 def index(request):
     recipes = Recipe.objects.all().annotate(is_favorite=Exists(
         Favorite.objects.filter(
-            user_id=request.user.pk,
+            user=request.user,
+            recipe_id=OuterRef('pk'),
+        ),
+    )).annotate(is_purchase=Exists(
+        PurchaseItem.objects.filter(
+            user=request.user,
             recipe_id=OuterRef('pk'),
         ),
     ))
@@ -33,7 +38,12 @@ def user_recipe(request, username):
     follow = Follow.objects.filter(user=request.user, author=author).exists()
     recipes = Recipe.objects.filter(author=author).annotate(is_favorite=Exists(
         Favorite.objects.filter(
-            user_id=request.user.pk,
+            user=request.user,
+            recipe_id=OuterRef('pk'),
+        ),
+    )).annotate(is_purchase=Exists(
+        PurchaseItem.objects.filter(
+            user=request.user,
             recipe_id=OuterRef('pk'),
         ),
     ))
@@ -56,10 +66,15 @@ def user_recipe(request, username):
 def favorite(request):
     recipes = Recipe.objects.all().annotate(is_favorite=Exists(
         Favorite.objects.filter(
-            user_id=request.user.pk,
+            user=request.user,
             recipe_id=OuterRef('pk'),
         ),
-    )).filter(is_favorite=True)
+    )).filter(is_favorite=True).annotate(is_purchase=Exists(
+        PurchaseItem.objects.filter(
+            user=request.user,
+            recipe_id=OuterRef('pk'),
+        ),
+    ))
     paginator = Paginator(recipes, 6)
     page_number = request.GET.get("page")
     page = paginator.get_page(page_number)
@@ -148,7 +163,6 @@ def edit_recipe(request, recipe_id):
 @login_required()
 def delete_recipe(request, recipe_id):
     recipe = get_object_or_404(Recipe, pk=recipe_id, author=request.user)
-    print(recipe)
     recipe.delete()
     return redirect("user_recipe", username=request.user.username)
 
@@ -159,10 +173,30 @@ def recipe_view(request, recipe_id):
             user_id=request.user.pk,
             recipe_id=recipe_id,
         ),
+    )).annotate(is_purchase=Exists(
+        PurchaseItem.objects.filter(
+            user=request.user,
+            recipe_id=OuterRef('pk'),
+        ),
     ))[0]
     follow = Follow.objects.filter(user=request.user, author=recipe.author).exists()
     return render(
         request,
         "recipe.html",
         {"recipe": recipe, "follow": follow}
+    )
+
+
+@login_required()
+def purchase_view(request):
+    recipes = Recipe.objects.all().annotate(is_purchase=Exists(
+        PurchaseItem.objects.filter(
+            user=request.user,
+            recipe_id=OuterRef('pk'),
+        ),
+    )).filter(is_purchase=True)
+    return render(
+        request,
+        "purchases_list.html",
+        {"recipes": recipes}
     )

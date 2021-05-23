@@ -65,7 +65,9 @@
         </div>
         {% if user.is_authenticated %}
         <ul class="single-card__items">
-            <li class="single-card__item"><button class="button button_style_blue" name="purchases" data-out><span class="icon-plus"></span> Добавить в покупки</button></li>
+            <li class="single-card__item">
+            {% include 'includes/purchases_button.html' %}
+            </li>
             <li class="single-card__item"><button class="button button_style_light-blue button_size_subscribe" name="subscribe" data-out>
             {% if follow %}
             Отписаться от автора

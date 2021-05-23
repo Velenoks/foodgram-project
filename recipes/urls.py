@@ -13,10 +13,13 @@ views_patterns = [
     path('recipe/<int:recipe_id>/delete/', views.delete_recipe, name='delete_recipe'),
     path('favorite/', views.favorite, name='favorite'),
     path('<str:username>/', views.user_recipe, name='user_recipe'),
-    path('follow', views.follow, name='follow')
+    path('follow', views.follow, name='follow'),
+    path('purchase', views.purchase_view, name='purchase')
 ]
 
 api_patterns = [
+    path('purchases/', AddPurchaseItem.as_view()),
+    path('purchases/<int:pk>/', RemovePurchaseItem.as_view()),
     path('favorites/', AddToFavorites.as_view()),
     path('favorites/<int:pk>/', RemoveFromFavorites.as_view()),
     path('subscriptions/', AddToSubscriptions.as_view()),
