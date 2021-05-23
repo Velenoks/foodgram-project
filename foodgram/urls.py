@@ -1,3 +1,4 @@
+import debug_toolbar
 from django.views.static import serve
 from django.conf import settings
 from django.conf.urls import handler400, handler500, url  # noqa
@@ -14,7 +15,8 @@ urlpatterns = [
     path('auth/', include('users.urls')),
     path('auth/', include('django.contrib.auth.urls')),
     path('about/', include('about.urls', namespace='about')),
-    path('', include('recipes.urls'))
+    path('', include('recipes.urls')),
+    path('__debug__/', include(debug_toolbar.urls)),
 ]
 
 

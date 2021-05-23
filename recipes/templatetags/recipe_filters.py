@@ -8,6 +8,7 @@ register = template.Library()
 def get_filter_values(value):
     return value.getlist('tag')
 
+
 @register.filter(name="get_filter_link")
 def get_filter_link(request, tag):
     new_request = request.GET.copy()
@@ -20,6 +21,7 @@ def get_filter_link(request, tag):
         new_request.pop('page')
     new_request.setlist('tag', tags)
     return new_request.urlencode()
+
 
 @register.filter(name='construct_page_link')
 def construct_page_link(request, page):

@@ -11,6 +11,12 @@ DEBUG = int(os.getenv("DEBUG"))
 
 ALLOWED_HOSTS = ['*']
 
+INTERNAL_IPS = [
+    # ...
+    '127.0.0.1',
+    # ...
+]
+
 INSTALLED_APPS = [
     # Django apps
     'django.contrib.admin',
@@ -26,7 +32,8 @@ INSTALLED_APPS = [
     'about',
 
     # Install apps
-    'sorl.thumbnail'
+    'sorl.thumbnail',
+    'debug_toolbar'
 ]
 
 MIDDLEWARE = [
@@ -37,6 +44,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'foodgram.urls'
@@ -95,7 +103,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR,'staticfiles')
+    os.path.join(BASE_DIR, 'staticfiles')
 ]
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
@@ -105,7 +113,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 LOGIN_URL = "/auth/login/"
 LOGIN_REDIRECT_URL = "index"
 
-APPEND_SLASH=False
+APPEND_SLASH = False
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

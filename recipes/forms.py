@@ -22,9 +22,10 @@ class RecipeForm(forms.ModelForm):
             self.add_error('tag_lunch', text_error)
         return cleaned_data
 
-
     class Meta:
-        image = forms.FileField(widget=forms.ClearableFileInput(attrs={'class': 'form__file'}))
+        image = forms.FileField(
+            widget=forms.ClearableFileInput(attrs={'class': 'form__file'})
+        )
 
         model = Recipe
         fields = (

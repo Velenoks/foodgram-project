@@ -1,11 +1,4 @@
-import os
-from io import BytesIO
-
-from django.conf import settings
-from django.http import HttpResponse
-from django.template.loader import get_template
 from django.shortcuts import get_object_or_404
-from xhtml2pdf import pisa
 
 from recipes.models import Ingredient
 
@@ -19,8 +12,9 @@ def parser_ingredients(data):
             keys_ingredients.append(key)
     lens = len(keys_ingredients)
     for i in range(0, lens, 2):
-        ingredient = get_object_or_404(Ingredient, title=data[keys_ingredients[i]])
-        count = int(data[keys_ingredients[i+1]])
+        ingredient = get_object_or_404(Ingredient,
+                                       title=data[keys_ingredients[i]])
+        count = int(data[keys_ingredients[i + 1]])
         ingredients.append((ingredient, count))
     return ingredients
 
@@ -37,5 +31,6 @@ def ingredients_in_text(items):
             }
     text = ''
     for ingredient in ingredients:
-        text += f"{ingredient} - {ingredients[ingredient]['value']} {ingredients[ingredient]['dimension']}\n"
+        text += f"{ingredient} - {ingredients[ingredient]['value']} " \
+                f"{ingredients[ingredient]['dimension']}\n"
     return text

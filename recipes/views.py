@@ -6,24 +6,29 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
 from recipes.forms import RecipeForm
-from recipes.models import Recipe, Follow, USER, Favorite, RecipeIngredient, PurchaseItem
+from recipes.models import (Recipe, Follow, USER,
+                            Favorite, RecipeIngredient, PurchaseItem)
 from recipes.helpers import parser_ingredients, ingredients_in_text
 
 
 def index(request):
-    recipes = Recipe.objects.all()
+    recipes = Recipe.objects.all().select_related(
+        'author',
+    )
     if request.user.is_authenticated:
-        recipes = recipes.annotate(is_favorite=Exists(
-        Favorite.objects.filter(
-            user=request.user,
-            recipe_id=OuterRef('pk'),
-        ),
-    )).annotate(is_purchase=Exists(
-        PurchaseItem.objects.filter(
-            user=request.user,
-            recipe_id=OuterRef('pk'),
-        ),
-    ))
+        recipes = recipes.annotate(
+            is_favorite=Exists(
+                Favorite.objects.filter(
+                    user=request.user, recipe_id=OuterRef('pk')
+                )
+            )
+        ).annotate(
+            is_purchase=Exists(
+                PurchaseItem.objects.filter(
+                    user=request.user, recipe_id=OuterRef('pk')
+                )
+            )
+        )
     tags = request.GET.getlist('tag')
     if 'tag_breakfast' in tags:
         recipes = recipes.filter(tag_breakfast=True)
@@ -47,20 +52,26 @@ def index(request):
 def user_recipe(request, username):
     author = get_object_or_404(USER, username=username)
     follow = False
-    recipes = Recipe.objects.filter(author=author)
+    recipes = Recipe.objects.filter(author=author).select_related(
+        'author',
+    )
     if request.user.is_authenticated:
-        follow = Follow.objects.filter(user=request.user, author=author).exists()
-        recipes = recipes.annotate(is_favorite=Exists(
-        Favorite.objects.filter(
-            user=request.user,
-            recipe_id=OuterRef('pk'),
-        ),
-    )).annotate(is_purchase=Exists(
-        PurchaseItem.objects.filter(
-            user=request.user,
-            recipe_id=OuterRef('pk'),
-        ),
-    ))
+        follow = Follow.objects.filter(
+            user=request.user, author=author
+        ).exists()
+        recipes = recipes.annotate(
+            is_favorite=Exists(
+                Favorite.objects.filter(
+                    user=request.user, recipe_id=OuterRef('pk')
+                )
+            )
+        ).annotate(
+            is_purchase=Exists(
+                PurchaseItem.objects.filter(
+                    user=request.user, recipe_id=OuterRef('pk')
+                )
+            )
+        )
     tags = request.GET.getlist('tag')
     if 'tag_breakfast' in tags:
         recipes = recipes.filter(tag_breakfast=True)
@@ -85,17 +96,21 @@ def user_recipe(request, username):
 
 @login_required()
 def favorite(request):
-    recipes = Recipe.objects.all().annotate(is_favorite=Exists(
-        Favorite.objects.filter(
-            user=request.user,
-            recipe_id=OuterRef('pk'),
-        ),
-    )).filter(is_favorite=True).annotate(is_purchase=Exists(
-        PurchaseItem.objects.filter(
-            user=request.user,
-            recipe_id=OuterRef('pk'),
-        ),
-    ))
+    recipes = Recipe.objects.all().select_related(
+        'author',
+    ).annotate(
+        is_favorite=Exists(
+            Favorite.objects.filter(
+                user=request.user, recipe_id=OuterRef('pk')
+            )
+        )
+    ).filter(is_favorite=True).annotate(
+        is_purchase=Exists(
+            PurchaseItem.objects.filter(
+                user=request.user, recipe_id=OuterRef('pk')
+            )
+        )
+    )
     tags = request.GET.getlist('tag')
     if 'tag_breakfast' in tags:
         recipes = recipes.filter(tag_breakfast=True)
@@ -118,8 +133,13 @@ def favorite(request):
 
 @login_required()
 def follow(request):
-    users = USER.objects.filter(following__user=request.user).annotate(recipes_count=Count('recipes')).order_by(
-        'username')
+    users = USER.objects.filter(
+        following__user=request.user
+    ).annotate(
+        recipes_count=Count('recipes')
+    ).prefetch_related(
+        'recipes',
+    ).order_by('username')
     paginator = Paginator(users, 6)
     page_number = request.GET.get("page")
     page = paginator.get_page(page_number)
@@ -147,7 +167,9 @@ def new_recipe(request):
         create_recipe.save()
         recipe = Recipe.objects.latest('pk')
         for ingredient in ingredients:
-            RecipeIngredient.objects.create(recipe=recipe, ingredient=ingredient[0], count=ingredient[1])
+            RecipeIngredient.objects.create(recipe=recipe,
+                                            ingredient=ingredient[0],
+                                            count=ingredient[1])
         return redirect("index")
     return render(
         request,
@@ -174,7 +196,9 @@ def edit_recipe(request, recipe_id):
         form.save()
         RecipeIngredient.objects.filter(recipe=recipe).delete()
         for ingredient in ingredients:
-            RecipeIngredient.objects.create(recipe=recipe, ingredient=ingredient[0], count=ingredient[1])
+            RecipeIngredient.objects.create(recipe=recipe,
+                                            ingredient=ingredient[0],
+                                            count=ingredient[1])
         return redirect("recipe", recipe_id=recipe_id)
     return render(
         request,
@@ -199,16 +223,21 @@ def recipe_view(request, recipe_id):
     recipe = Recipe.objects.filter(pk=recipe_id)
     follow = False
     if request.user.is_authenticated:
-        recipe = recipe.annotate(is_favorite=Exists(
-        Favorite.objects.filter(
-            user_id=request.user.pk,
-            recipe_id=recipe_id,
-        ))).annotate(is_purchase=Exists(
-        PurchaseItem.objects.filter(
-            user=request.user,
-            recipe_id=OuterRef('pk'),
-        )))
-        follow = Follow.objects.filter(user=request.user, author=recipe.author).exists()
+        recipe = recipe.annotate(
+            is_favorite=Exists(
+                Favorite.objects.filter(
+                    user_id=request.user.pk, recipe_id=recipe_id
+                )
+            )
+        ).annotate(
+            is_purchase=Exists(
+                PurchaseItem.objects.filter(
+                    user=request.user, recipe_id=OuterRef('pk')
+                )
+            )
+        )
+        follow = Follow.objects.filter(user=request.user,
+                                       author=recipe[0].author).exists()
     return render(
         request,
         "recipe.html",
@@ -243,7 +272,8 @@ def download_purchases(request):
               "Ингридиенты:\n" + ingredients_in_text(items)
     filename = f"purchase_{request.user.username}.txt"
     response = HttpResponse(content, content_type="text/plain")
-    response["Content-Disposition"] = "attachment; filename={0}".format(filename)
+    response["Content-Disposition"] = "attachment; filename={0}".format(
+        filename)
     return response
 
 

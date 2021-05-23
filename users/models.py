@@ -3,13 +3,14 @@ from django.db import models
 
 
 class User(AbstractUser):
-    email = models.EmailField(unique=True, db_index=True, verbose_name='Электронная почта')
+    email = models.EmailField(unique=True, db_index=True,
+                              verbose_name='Электронная почта')
     first_name = models.CharField(max_length=150,
-                                blank=False,
-                                verbose_name='Имя')
+                                  blank=False,
+                                  verbose_name='Имя')
     last_name = models.CharField(max_length=150,
-                                blank=False,
-                                verbose_name='Фамилия')
+                                 blank=False,
+                                 verbose_name='Фамилия')
 
     class Meta:
         verbose_name = 'Пользователь'
