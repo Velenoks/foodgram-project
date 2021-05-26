@@ -10,7 +10,7 @@ CSV_FILE_PATH = os.path.join(BASE_DIR, "ingredients.csv")
 
 
 class Command(BaseCommand):
-    help = 'Загрузка ингридиентов'
+    help = 'Загрузка ингредиентов'
 
     def handle(self, *args, **options):
         with open(CSV_FILE_PATH, encoding="utf-8") as file:

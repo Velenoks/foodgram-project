@@ -1,14 +1,15 @@
 import datetime
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Exists, OuterRef, Count
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
-from recipes.forms import RecipeForm
-from recipes.models import (Recipe, Follow, USER,
-                            Favorite, RecipeIngredient, PurchaseItem)
-from recipes.helpers import parser_ingredients, ingredients_in_text
+from .forms import RecipeForm
+from .models import (Recipe, Follow, USER,
+                     Favorite, RecipeIngredient, PurchaseItem)
+from .helpers import parser_ingredients, ingredients_in_text, tag_filter
 
 
 def index(request):
@@ -29,14 +30,8 @@ def index(request):
                 )
             )
         )
-    tags = request.GET.getlist('tag')
-    if 'tag_breakfast' in tags:
-        recipes = recipes.filter(tag_breakfast=True)
-    if 'tag_lunch' in tags:
-        recipes = recipes.filter(tag_lunch=True)
-    if 'tag_dinner' in tags:
-        recipes = recipes.filter(tag_dinner=True)
-    paginator = Paginator(recipes, 6)
+    recipes = tag_filter(request, recipes)
+    paginator = Paginator(recipes, settings.ELEMENTS_ON_PAGE)
     page_number = request.GET.get("page")
     page = paginator.get_page(page_number)
     return render(
@@ -72,14 +67,8 @@ def user_recipe(request, username):
                 )
             )
         )
-    tags = request.GET.getlist('tag')
-    if 'tag_breakfast' in tags:
-        recipes = recipes.filter(tag_breakfast=True)
-    if 'tag_lunch' in tags:
-        recipes = recipes.filter(tag_lunch=True)
-    if 'tag_dinner' in tags:
-        recipes = recipes.filter(tag_dinner=True)
-    paginator = Paginator(recipes, 6)
+    recipes = tag_filter(request, recipes)
+    paginator = Paginator(recipes, settings.ELEMENTS_ON_PAGE)
     page_number = request.GET.get("page")
     page = paginator.get_page(page_number)
     return render(
@@ -111,14 +100,8 @@ def favorite(request):
             )
         )
     )
-    tags = request.GET.getlist('tag')
-    if 'tag_breakfast' in tags:
-        recipes = recipes.filter(tag_breakfast=True)
-    if 'tag_lunch' in tags:
-        recipes = recipes.filter(tag_lunch=True)
-    if 'tag_dinner' in tags:
-        recipes = recipes.filter(tag_dinner=True)
-    paginator = Paginator(recipes, 6)
+    recipes = tag_filter(request, recipes)
+    paginator = Paginator(recipes, settings.ELEMENTS_ON_PAGE)
     page_number = request.GET.get("page")
     page = paginator.get_page(page_number)
     return render(
@@ -140,7 +123,7 @@ def follow(request):
     ).prefetch_related(
         'recipes',
     ).order_by('username')
-    paginator = Paginator(users, 6)
+    paginator = Paginator(users, settings.ELEMENTS_ON_PAGE)
     page_number = request.GET.get("page")
     page = paginator.get_page(page_number)
     return render(
@@ -269,7 +252,7 @@ def download_purchases(request):
     content = f"Время {datetime.datetime.now()}\n" \
               f"Всего репептов - {recipes.count()}\n" \
               f"Список составлен для {full_name}\n" \
-              "Ингридиенты:\n" + ingredients_in_text(items)
+              "Ингредиенты:\n" + ingredients_in_text(items)
     filename = f"purchase_{request.user.username}.txt"
     response = HttpResponse(content, content_type="text/plain")
     response["Content-Disposition"] = "attachment; filename={0}".format(

@@ -6,7 +6,11 @@
             <li class="nav__item"><a href="{% url 'follow' %}" class="nav__link link">Мои подписки</a></li>
             <li class="nav__item"><a href="{% url 'new_recipe' %}" class="nav__link link">Создать рецепт</a></li>
             <li class="nav__item"><a href="{% url 'favorite' %}" class="nav__link link">Избранное</a></li>
-            <li class="nav__item"><a href="{% url 'purchase' %}" class="nav__link link">Список покупок</a><span class="badge badge_style_blue nav__badge" id="counter">{{ user.purchase.count }}</span></li>
+            <li class="nav__item"><a href="{% url 'purchase' %}" class="nav__link link">Список покупок</a>
+                <span class="badge badge_style_blue nav__badge" id="counter" {% if user.purchase.count < 1 %} hidden {% endif %}>
+                    {{ user.purchase.count }}
+                </span>
+            </li>
         </ul>
         <ul class="nav__items list">
             <li class="nav__item"><a href="{% url 'password_change' %}" class="nav__link link">Изменить пароль</a></li>
@@ -23,3 +27,7 @@
         {% endif %}
     </div>
 </nav>
+
+
+docker run --detach --hostname gitlab.example.com --publish 443:443 --publish 80:80 --publish 22:22 --name gitlab --restart always --volume /srv/gitlab/config:/etc/gitlab --volume /srv/gitlab/logs:/var/log/gitlab --volume /srv/gitlab/data:/var/opt/gitlab gitlab/gitlab-ce:latest
+

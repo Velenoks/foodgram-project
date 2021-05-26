@@ -10,7 +10,12 @@ class MemdershipInline(admin.TabularInline):
 
 
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ("title", "pub_date", "author", "time_cooking",)
+    def recipe_favorite_count(self, obj):
+        return obj.favorites.count()
+    recipe_favorite_count.short_description = "В избранном"
+
+    list_display = ("title", "pub_date", "author",
+                    "time_cooking", 'recipe_favorite_count')
     search_fields = ("title", "text",)
     list_filter = ("tag_breakfast", "tag_lunch",
                    "tag_dinner", "pub_date", "author",)

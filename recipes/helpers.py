@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 
-from recipes.models import Ingredient
+from .models import Ingredient
 
 
 def parser_ingredients(data):
@@ -24,7 +24,7 @@ def ingredients_in_text(items):
     for itm in items:
         try:  # Прибавить к имеющемуся
             ingredients[itm.ingredient.title]["value"] += itm.count
-        except KeyError:  # Добавить новый ингридиент
+        except KeyError:  # Добавить новый ингредиент
             ingredients[itm.ingredient.title] = {
                 "value": itm.count,
                 "dimension": itm.ingredient.dimension
@@ -34,3 +34,14 @@ def ingredients_in_text(items):
         text += f"{ingredient} - {ingredients[ingredient]['value']} " \
                 f"{ingredients[ingredient]['dimension']}\n"
     return text
+
+
+def tag_filter(request, recipes):
+    tags = request.GET.getlist('tag')
+    if 'tag_breakfast' in tags:
+        recipes = recipes.filter(tag_breakfast=True)
+    if 'tag_lunch' in tags:
+        recipes = recipes.filter(tag_lunch=True)
+    if 'tag_dinner' in tags:
+        recipes = recipes.filter(tag_dinner=True)
+    return recipes

@@ -13,8 +13,8 @@ class Ingredient(models.Model):
         return f"{self.title} {self.dimension}"
 
     class Meta:
-        verbose_name = 'Ингридиент'
-        verbose_name_plural = 'Ингридиенты'
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
 
 
 class Recipe(models.Model):
@@ -27,7 +27,7 @@ class Recipe(models.Model):
         help_text='Время приготовления в минутах')
     ingredient = models.ManyToManyField(
         Ingredient, through='RecipeIngredient',
-        through_fields=('recipe', 'ingredient'), verbose_name='Ингридиент')
+        through_fields=('recipe', 'ingredient'), verbose_name='Ингредиент')
     image = models.ImageField(upload_to='recipe/',
                               verbose_name='Картинка', default=0)
     pub_date = models.DateTimeField('date published', auto_now_add=True)
