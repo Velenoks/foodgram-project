@@ -3,6 +3,7 @@ Django==3.2.2
 django-filter==2.4.0
 djangorestframework==3.12.4
 djangorestframework-simplejwt==4.6.0
+gunicorn==20.1.0
 Pillow==8.2.0
 psycopg2==2.8.6
 PyJWT==2.1.0

@@ -11,12 +11,6 @@ DEBUG = int(os.getenv("DEBUG"))
 
 ALLOWED_HOSTS = ['*']
 
-INTERNAL_IPS = [
-    # ...
-    '127.0.0.1',
-    # ...
-]
-
 INSTALLED_APPS = [
     # Django apps
     'django.contrib.admin',
@@ -32,8 +26,7 @@ INSTALLED_APPS = [
     'about',
 
     # Install apps
-    'sorl.thumbnail',
-    'debug_toolbar'
+    'sorl.thumbnail'
 ]
 
 MIDDLEWARE = [
@@ -44,7 +37,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'foodgram.urls'
@@ -68,11 +60,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'foodgram.wsgi.application'
 
-# Подключу PostgreSQL ко второй проверке
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('POSTGRES_USER'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST'),
+        'PORT': os.environ.get('DB_PORT'),
     }
 }
 
