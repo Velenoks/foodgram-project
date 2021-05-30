@@ -132,4 +132,3 @@ dmypy.json
 /static/
 /media/
 sent_emails/
-/setup.cfg

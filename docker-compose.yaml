@@ -9,7 +9,7 @@ services:
       - ./.env
 
   web:
-    build: velenoks/diplom:latest
+    image: velenoks/diplom:latest
     restart: always
     ports:
       - "8000:8000"
