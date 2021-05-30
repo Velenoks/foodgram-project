@@ -22,7 +22,7 @@ class RecipeForm(forms.ModelForm):
                 error_ingredient = False
                 break
         for key in self.data.keys():
-            if 'valueIngredient' in key and int(self.data[key]) == 0:
+            if 'valueIngredient' in key and int(self.data[key]) <= 0:
                 text_error = 'Кол-во ингредиента не может быть меньше 1'
                 self.add_error('tag_lunch', text_error)
                 break
@@ -32,7 +32,7 @@ class RecipeForm(forms.ModelForm):
 
         # Проверка наличия ингредиента
         time_cooking = cleaned_data.get('time_cooking')
-        if time_cooking == 0:
+        if time_cooking <= 0:
             text_error = 'Время приготовления не может быть меньше 1 минуты'
             self.add_error('time_cooking', text_error)
 

@@ -55,6 +55,8 @@ jobs:
         passphrase: ${{ secrets.PASSPHRASE }}
         script: |
           cd foodgram-project
+          sudo docker-compose down
+          sudo docker rmi velenoks/diplom
           sudo docker-compose up --build -d
 
   send_message:
