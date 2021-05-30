@@ -32,10 +32,9 @@ class RecipeForm(forms.ModelForm):
 
         # Проверка наличия ингредиента
         time_cooking = cleaned_data.get('time_cooking')
-        if time_cooking <= 0:
+        if time_cooking == None or time_cooking <= 0:
             text_error = 'Время приготовления не может быть меньше 1 минуты'
             self.add_error('time_cooking', text_error)
-
         return cleaned_data
 
     class Meta:

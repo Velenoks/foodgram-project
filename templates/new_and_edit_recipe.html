@@ -86,7 +86,9 @@
                 <div class="form__field-group form__field-group_time">
                     <input type="text" id="{{ form.time_cooking.id_for_label }}" name="{{ form.time_cooking.name }}" value="{{ recipe.time_cooking }}" class="form__input">
                     <label for="{{ form.time_cooking.id_for_label }}" class="form__label">минут</label>
-                    <span class="form__error">{{ form.time_cooking.errors }}</span>
+                    {% if form.time_cooking.errors %}
+                    <span class="form__error">Время приготовления не может быть меньше 1 минуты</span>
+                    {% endif %}
                 </div>
             </div>
             <div class="form__group">
